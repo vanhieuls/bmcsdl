@@ -1,0 +1,18 @@
+{% extends "vote/master.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ candidate.name }}</h1>
+    <img src="{{ candidate.image.url }}" alt="{{ candidate.name }}" class="img-fluid" style="max-height: 80vh;">
+    <p>{{ candidate.birthdate }}</p>
+    <p>{{ candidate.description }}</p>
+
+    <form method="POST" action="{% url 'vote:vote' candidate.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Vote</button>
+    </form>
+
+    <a href="{% url 'vote:index' %}" class="btn btn-secondary">Back to Candidates</a>
+</div>
+
+{% endblock %}

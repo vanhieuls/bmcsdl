@@ -1,0 +1,11 @@
+{% extends "vote/master.html" %}
+
+{% block content %}
+<form class="m-3" method="POST" action="{% url 'vote:register' %}" style="width: 20rem">
+    {% csrf_token %}
+    {{ register_form }}
+    <br>
+    <a href="{% url 'vote:login' %}" class="btn btn-secondary btn-lg">Login</a>
+    <button type="submit" class="btn btn-primary btn-lg">Register</button>
+</form>
+{% endblock %}
