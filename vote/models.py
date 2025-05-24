@@ -5,14 +5,14 @@ from django.contrib.auth.models import AbstractUser
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, identifier, password, *args, **kwargs):
-        if not identifier:
+    def create_user(self, id, password, *args, **kwargs):
+        if not id:
             raise ValueError('Users must have an identifier')
         if not password:
             raise ValueError('Users must have a password')
 
         user = self.model(
-            identifier=identifier,
+            id=id,
             **kwargs
         )
 
@@ -20,9 +20,9 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, identifier, password):
+    def create_superuser(self, id, password):
         user = self.create_user(
-            identifier,
+            id,
             password=password,
         )
         user.is_superuser = True
@@ -34,7 +34,9 @@ class UserManager(BaseUserManager):
 
 class User(AbstractUser):
     username = None
-    identifier = models.CharField(max_length=40, unique=True)
+    first_name = None
+    last_name = None
+    id = models.CharField(max_length=40, unique=True, primary_key=True)
     name = models.CharField(max_length=100)
     birthdate = models.DateField(null=True, blank=True)
     address = models.CharField(max_length=255)
@@ -43,12 +45,12 @@ class User(AbstractUser):
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'identifier'
+    USERNAME_FIELD = 'id'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return self.identifier
+        return self.id
 
     def check_password(self, raw_password):
         """
@@ -57,15 +59,33 @@ class User(AbstractUser):
         return super().check_password(raw_password)
 
 
+class District(models.Model):
+    short_name = models.CharField(max_length=10)
+    long_name = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.short_name} - {self.long_name}"
+
+
+class Term(models.Model):
+    start = models.DateField(null=True, blank=True)
+    end = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.start.year} - {self.end.year}"
+
+
 class Candidate(models.Model):
+    _id = models.AutoField(primary_key=True)
+    id = models.CharField(max_length=40, unique=True)
     name = models.CharField(max_length=100)
     birthdate = models.DateField(null=True, blank=True)
     address = models.CharField(max_length=255)
-    district = models.CharField(max_length=100)
+    district = models.ForeignKey(District, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='images/')
     description = models.TextField(null=True, blank=True)
-    term_start = models.DateField(null=True, blank=True)
-    term_end = models.DateField(null=True, blank=True)
+    term = models.ForeignKey(Term, on_delete=models.CASCADE)
     votes = models.IntegerField(default=0, editable=False)
 
     def __str__(self):
@@ -78,15 +98,15 @@ class Candidate(models.Model):
 
 
 class Vote(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, to_field='identifier')
-    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE)
+    user = models.CharField(max_length=40)
+    candidate = models.CharField(max_length=40)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user} voted for {self.candidate}"
 
     def save(self, *args, **kwargs):
-        # Increment the candidate's vote count
-        self.candidate.votes += 1
-        self.candidate.save()
+        # TODO: add encryption here
+        # self.candidate.id = self.candidate.id + 1
+        print("Saving Vote:", self.candidate, self.user)
         super().save(*args, **kwargs)

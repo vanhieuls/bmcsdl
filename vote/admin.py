@@ -8,7 +8,7 @@ from django.contrib.auth.forms import UserChangeForm, UserCreationForm, AdminPas
 from django.template.response import TemplateResponse
 from django.core.exceptions import PermissionDenied
 
-from .models import Candidate, User
+from .models import Candidate, User, District, Term
 
 
 class CandidateAdmin(admin.ModelAdmin):
@@ -27,9 +27,9 @@ class CustomUserAdmin(admin.ModelAdmin):
     form = CustomUserChangeForm
     # readonly_fields = ["groups"]
     exclude = ["username"]
-    list_display = ["identifier", "name", "email", "district"]
+    list_display = ["id", "name", "email", "district"]
     fields = [
-        "identifier",
+        "id",
         "name",
         "password",
         "birthdate",
@@ -86,6 +86,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Candidate, CandidateAdmin)
-
-
 admin.site.register(User, CustomUserAdmin)
+admin.site.register(District)
+admin.site.register(Term)
+

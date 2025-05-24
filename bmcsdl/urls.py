@@ -19,6 +19,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+admin.site.site_header = 'Admin Panel'
+admin.site.site_title = 'Admin Panel'
+admin.site.index_title = ''
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('vote.urls')),

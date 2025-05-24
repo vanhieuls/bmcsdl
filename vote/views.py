@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils.http import urlencode
 
-from vote.models import User, Candidate
+from .models import User, Candidate, Vote
 from .forms import LoginForm, RegisterForm
 
 
@@ -86,13 +86,11 @@ def register(request):
             district = register_form.cleaned_data['district']
             email = register_form.cleaned_data['email']
             if password != password_confirm:
-                messages.error(request, "Passwords do not match")
                 return redirect('vote:register')
-            if User.objects.filter(identifier=id).exists():
-                messages.error(request, "ID already exists")
+            if User.objects.filter(id=id).exists():
                 return redirect('vote:register')
             user = User.objects.create_user(
-                identifier=id,
+                id=id,
                 password=password,
                 name=name,
                 birthdate=birthdate,
@@ -115,10 +113,6 @@ def candidate_detail(request, candidate_id):
 
     c = get_object_or_404(Candidate, id=candidate_id)
 
-    if request.method == 'POST':
-        # Handle voting logic here
-        pass
-
     return render(request, 'vote/candidate_detail.html', context={
         'candidate': c,
     })
@@ -131,7 +125,12 @@ def vote(request, candidate_id):
     c = get_object_or_404(Candidate, id=candidate_id)
 
     if request.method == 'POST':
-        # Handle voting logic here
-        pass
+        v = Vote.objects.create(
+            candidate=c.id,
+            user=request.user.id,
+        )
+        v.save()
+        messages.success(request, 'Vote successfully cast!')
+        return redirect('vote:index')
 
     return redirect('vote:index')
