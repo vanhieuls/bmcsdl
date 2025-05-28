@@ -111,6 +111,9 @@ class Vote(models.Model):
     def __str__(self):
         return f"{self.user} voted for {self.candidate}"
 
+    def count(self):
+        return Vote.objects.filter(candidate=self.candidate).count()
+
     def save(self, *args, **kwargs):
         # # TODO: add encryption here
         # # self.candidate.id = self.candidate.id + 1

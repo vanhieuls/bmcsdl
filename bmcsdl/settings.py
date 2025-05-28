@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "vote.apps.VoteConfig",
     'bootstrap5',
     'django_extensions',
+    'rangefilter',
 ]
 
 MIDDLEWARE = [

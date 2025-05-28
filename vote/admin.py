@@ -7,8 +7,16 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm, AdminPasswordChangeForm
 from django.template.response import TemplateResponse
 from django.core.exceptions import PermissionDenied
+from rangefilter.filters import (
+    DateRangeFilterBuilder,
+    DateTimeRangeFilterBuilder,
+    NumericRangeFilterBuilder,
+    DateRangeQuickSelectListFilterBuilder,
+)
 
-from .models import Candidate, User, District, Term
+
+from .models import Candidate, User, District, Term, Vote
+
 
 
 class CandidateAdmin(admin.ModelAdmin):
@@ -85,8 +93,20 @@ class CustomUserAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
 
+class VoteAdmin(admin.ModelAdmin):
+    list_display = ['user', 'candidate', 'timestamp']
+    list_filter = [('timestamp', DateRangeQuickSelectListFilterBuilder())]
+    search_fields = ['user__id', 'candidate__name']
+
+    def has_add_permission(self, request):
+        return False  # Disable adding votes through the admin interface
+
+    def has_delete_permission(self, request, obj=None):
+        return False  # Disable deleting votes through the admin interface
+
+
 admin.site.register(Candidate, CandidateAdmin)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(District)
 admin.site.register(Term)
-
+admin.site.register(Vote, VoteAdmin)

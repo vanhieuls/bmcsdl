@@ -16,3 +16,4 @@ soupsieve
 sqlparse
 typing_extensions
 tzdata
+django-admin-rangefilter
