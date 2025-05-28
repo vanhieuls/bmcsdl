@@ -1,5 +1,7 @@
+from django.contrib import admin
 from django.contrib.auth.base_user import BaseUserManager
 from django.db import models, connection
+from django.utils.functional import SimpleLazyObject
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import AbstractUser
 
@@ -74,14 +76,38 @@ class User(AbstractUser):
     def set_password(self, raw_password):
         if raw_password is None:
             raw_password = self.birthdate.strftime("%d%m%Y")
-        print("Setting password for user:", self.id, "with raw password:", raw_password)
         super().set_password(raw_password)
 
     def save(self, *args, **kwargs):
         if not self.password:
             self.set_password(None)
 
-        super().save(*args, **kwargs)
+        with connection.cursor() as cursor:
+            cursor.execute(
+                'EXECUTE dbo.SP_InsertEncryptedUser @id = %s, @name = %s, @birthdate = %s, @address = %s, @district_id = %s, @email = %s, @password = %s, @last_login = %s, @is_superuser = %s, @is_staff = %s, @is_active = 1',
+                [self.id, self.name, self.birthdate, self.address, self.district_id, self.email, self.password, self.last_login, self.is_superuser, self.is_staff]
+            )
+
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        user = super().from_db(db, field_names, values)
+        with connection.cursor() as cursor:
+            cursor.execute('EXECUTE dbo.SP_SelectDecryptedUserById @id = %s', [user.id])
+            row = cursor.fetchone()
+            if row:
+                user.id = row[0]
+                user.name = row[1]
+                user.birthdate = row[2]
+                user.address = row[3]
+                user.district_id = row[4]
+                user.email = row[5]
+                user.last_login = row[6]
+                user.is_superuser = row[7]
+                user.is_staff = row[8]
+                user.is_active = row[9]
+                user.date_joined = row[10]
+                user.voted = row[11]
+        return user
 
 
 class Term(models.Model):
@@ -109,6 +135,7 @@ class Candidate(models.Model):
     def image_tag(self):
         return mark_safe('<img src="/media/%s" width="150" style="max-height: 200px;object-fit: cover;" />' % self.image)
 
+    @admin.display(description="Votes")
     def get_vote_count(self):
         with connection.cursor() as cursor:
             cursor.execute('EXECUTE dbo.SP_CountFinalVotesByCandidate @candidate_id = %s', [self.id])
@@ -133,6 +160,8 @@ class Vote(models.Model):
     def cast_vote(self):
         with connection.cursor() as cursor:
             cursor.execute('use VOTE; EXECUTE dbo.SP_InsertEncryptedVote @user = %s, @candidate_id = %s', [self.user, self.candidate.id])
+
+        User.objects.filter(id=self.user).update(voted=True)
 
     def save(self, *args, **kwargs):
         # # # TODO: add encryption here
