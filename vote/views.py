@@ -132,7 +132,7 @@ def vote(request, candidate_id):
             user=request.user.id,
         )
         v.save()
-        messages.success(request, 'Vote successfully cast!')
+        # messages.success(request, 'Vote successfully cast!')
         return redirect('vote:index')
 
     return redirect('vote:index')

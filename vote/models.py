@@ -53,10 +53,10 @@ class User(AbstractUser):
         return self.id
 
     def check_password(self, raw_password):
-        """
-        Check if the provided raw_password matches the user's stored password.
-        """
         return super().check_password(raw_password)
+
+    def set_password(self, raw_password):
+        super().set_password(raw_password)
 
 
 class District(models.Model):

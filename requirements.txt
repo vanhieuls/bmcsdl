@@ -17,3 +17,4 @@ sqlparse
 typing_extensions
 tzdata
 django-admin-rangefilter
+bcrypt
