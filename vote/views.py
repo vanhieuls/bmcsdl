@@ -128,7 +128,7 @@ def vote(request, candidate_id):
 
     if request.method == 'POST':
         v = Vote.objects.create(
-            candidate=c.id,
+            candidate=c,
             user=request.user.id,
         )
         v.save()
