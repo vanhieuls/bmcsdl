@@ -93,9 +93,9 @@ class CustomUserAdmin(admin.ModelAdmin):
 
 
 class VoteAdmin(admin.ModelAdmin):
-    list_display = ['user', 'candidate', 'timestamp']
+    list_display = ['candidate', 'timestamp']
     list_filter = [('timestamp', DateRangeQuickSelectListFilterBuilder())]
-    search_fields = ['user__id', 'candidate__name']
+    search_fields = ['candidate__name']
 
     def has_add_permission(self, request):
         return False  # Disable adding votes through the admin interface

@@ -1,5 +1,5 @@
 from django.contrib.auth.base_user import BaseUserManager
-from django.db import models
+from django.db import models, connection
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import AbstractUser
 
@@ -97,14 +97,13 @@ class Candidate(models.Model):
     def get_vote_count(self):
         votes = Vote.objects.filter(candidate=self.id).values_list('user', flat=True)
         votes = votes.distinct()
-        print(votes)
         return votes.count()
 
     image_tag.short_description = 'Image'
 
 
 class Vote(models.Model):
-    user = models.CharField(max_length=40)
+    user = models.CharField(max_length=4000)
     candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, to_field='id')
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -114,13 +113,12 @@ class Vote(models.Model):
     def count(self):
         return Vote.objects.filter(candidate=self.candidate).count()
 
-    def save(self, *args, **kwargs):
-        # # TODO: add encryption here
-        # # self.candidate.id = self.candidate.id + 1
-        # print("Saving Vote:", self.candidate, self.user)
-        super().save(*args, **kwargs)
+    def cast_vote(self):
+        print(self.user, self.candidate.id)
+        with connection.cursor() as cursor:
+            cursor.execute('use VOTE; EXECUTE dbo.SP_InsertEncryptedVote @user = %s, @candidate_id = %s', [self.user, self.candidate.id])
 
-        # Increment the candidate's vote count
-        # candidate = Candidate.objects.get(id=self.candidate)
-        # candidate.votes += 1
-        # candidate.save()
+    def save(self, *args, **kwargs):
+        # # # TODO: add encryption here
+        # super().save(*args, **kwargs)
+        pass
