@@ -8,7 +8,7 @@ from django.utils.http import urlencode
 
 
 from .models import User, Candidate, Vote
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, ChangePasswordForm
 
 
 def check_authentication(f):
@@ -151,3 +151,34 @@ def vote(request, candidate_id):
         return redirect('vote:index')
 
     return redirect('vote:index')
+
+
+def change_password(request):
+    if not request.user.is_authenticated:
+        return redirect('vote:index')
+
+    if request.method == 'POST':
+        change_password_form = ChangePasswordForm(request.POST)
+
+        if change_password_form.is_valid():
+            old_password = change_password_form.cleaned_data['old_password']
+            new_password = change_password_form.cleaned_data['new_password']
+            confirm_new_password = change_password_form.cleaned_data['confirm_new_password']
+
+            if not request.user.check_password(old_password):
+                messages.error(request, 'Mật khẩu cũ không đúng.')
+                return redirect('vote:change_password')
+
+            if new_password != confirm_new_password:
+                messages.error(request, 'Mật khẩu mới không khớp.')
+                return redirect('vote:change_password')
+
+            request.user.set_password(new_password)
+            request.user.save()
+            messages.success(request, 'Đổi mật khẩu thành công!')
+            return redirect('vote:index')
+    else:
+        change_password_form = ChangePasswordForm()
+    return render(request, 'vote/change_password.html', context={
+        'change_password_form': change_password_form,
+    })

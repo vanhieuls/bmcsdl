@@ -41,3 +41,25 @@ class RegisterForm(forms.Form):
     birthdate = forms.DateField(label='Birthdate', widget=forms.DateInput(attrs={'type': 'date'}))
     address = forms.CharField(label='Address', max_length=255)
     district = forms.CharField(label='District', max_length=100)
+
+
+class ChangePasswordForm(forms.Form):
+    old_password = forms.CharField(label='Old Password', widget=forms.PasswordInput)
+    new_password = forms.CharField(label='New Password', widget=forms.PasswordInput)
+    confirm_new_password = forms.CharField(label='Confirm New Password', widget=forms.PasswordInput)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.required = True
+            field.error_messages = {'required': ''}
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get('new_password')
+        confirm_new_password = cleaned_data.get('confirm_new_password')
+
+        if new_password != confirm_new_password:
+            raise forms.ValidationError("New password and confirmation do not match.")
+
+        return cleaned_data

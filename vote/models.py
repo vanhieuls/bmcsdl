@@ -62,7 +62,16 @@ class User(AbstractUser):
         return super().check_password(raw_password)
 
     def set_password(self, raw_password):
+        if raw_password is None:
+            raw_password = self.birthdate.strftime("%d%m%Y")
+        print("Setting password for user:", self.id, "with raw password:", raw_password)
         super().set_password(raw_password)
+
+    def save(self, *args, **kwargs):
+        if not self.password:
+            self.set_password(None)
+
+        super().save(*args, **kwargs)
 
 
 class District(models.Model):
