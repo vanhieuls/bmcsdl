@@ -1,27 +1,38 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.forms import UserChangeForm
+from django.contrib.auth.forms import UserChangeForm, AdminPasswordChangeForm
 from django.core.exceptions import PermissionDenied
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.forms import UserChangeForm, UserCreationForm, AdminPasswordChangeForm
+from django.db.models import Count
 from django.template.response import TemplateResponse
-from django.core.exceptions import PermissionDenied
 from rangefilter.filters import (
-    DateRangeFilterBuilder,
-    DateTimeRangeFilterBuilder,
-    NumericRangeFilterBuilder,
     DateRangeQuickSelectListFilterBuilder,
 )
-
 
 from .models import Candidate, User, District, Term, Vote
 
 
 class CandidateAdmin(admin.ModelAdmin):
     readonly_fields = ["votes", "image_tag"]
-    list_display = ["name", "district", "image_tag", "get_vote_count"]
+    list_display = ["name", "district", "image_tag", "vote_count"]
     list_filter = ["district"]
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        queryset = queryset.filter(district=request.user.district)
+        return queryset.annotate(vote_count=Count('vote'))
+
+    @admin.display(description="Votes", ordering='vote_count')
+    def vote_count(self, obj):
+        return obj.get_vote_count()
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "district" and request.user.is_superuser:
+            kwargs["queryset"] = District.objects.filter(id=request.user.district.id)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        if obj.district is None:
+            raise PermissionDenied("You must select a district for the candidate.")
+        return super().save_model(request, obj, form, change)
 
 
 class CustomUserChangeForm(UserChangeForm):
@@ -32,9 +43,8 @@ class CustomUserChangeForm(UserChangeForm):
 
 class CustomUserAdmin(admin.ModelAdmin):
     form = CustomUserChangeForm
-    # readonly_fields = ["groups"]
     exclude = ["username"]
-    list_display = ["id", "name", "email", "district"]
+    list_display = ["id", "name", "email", "district", "voted"]
     fields = [
         "id",
         "name",
@@ -91,6 +101,20 @@ class CustomUserAdmin(admin.ModelAdmin):
         ]
         return custom_urls + urls
 
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.filter(district=request.user.district)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "district" and request.user.is_superuser:
+            kwargs["queryset"] = District.objects.filter(id=request.user.district.id)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        if obj.district is None:
+            raise PermissionDenied("You must select a district for the candidate.")
+        return super().save_model(request, obj, form, change)
+
 
 class VoteAdmin(admin.ModelAdmin):
     list_display = ['candidate', 'timestamp']
@@ -108,4 +132,3 @@ admin.site.register(Candidate, CandidateAdmin)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(District)
 admin.site.register(Term)
-admin.site.register(Vote, VoteAdmin)
