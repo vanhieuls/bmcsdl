@@ -18,7 +18,6 @@ from rangefilter.filters import (
 from .models import Candidate, User, District, Term, Vote
 
 
-
 class CandidateAdmin(admin.ModelAdmin):
     readonly_fields = ["votes", "image_tag"]
     list_display = ["name", "district", "image_tag", "get_vote_count"]

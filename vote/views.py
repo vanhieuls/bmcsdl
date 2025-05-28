@@ -40,6 +40,8 @@ def login(request):
     next_url = request.GET.get('next', reverse('vote:index'))
 
     if request.method == 'POST':
+        if request.user.is_authenticated:
+            return redirect('vote:index')
         login_form = LoginForm(request.POST)
         if login_form.is_valid():
             id = login_form.cleaned_data['id']
