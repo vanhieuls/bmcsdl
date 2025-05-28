@@ -161,29 +161,30 @@ def change_password(request):
 
     if request.method == 'POST':
         change_password_form = ChangePasswordForm(request.POST)
+        
+        # Kiểm tra mật khẩu hiện tại trước
+        old_password = request.POST.get('old_password')
+        if old_password and not request.user.check_password(old_password):
+            change_password_form.add_error('old_password', 'Mật khẩu hiện tại không hợp lệ')
+            return render(request, 'vote/change_password.html', {
+                'change_password_form': change_password_form
+            })
 
+        # Sau đó mới kiểm tra các điều kiện khác
         if change_password_form.is_valid():
-            old_password = change_password_form.cleaned_data['old_password']
             new_password = change_password_form.cleaned_data['new_password']
-            confirm_new_password = change_password_form.cleaned_data['confirm_new_password']
-
-            if not request.user.check_password(old_password):
-                messages.error(request, 'Mật khẩu hiện tại không đúng.')
-                return render(request, 'vote/change_password.html', {
-                    'change_password_form': change_password_form
-                })
-
-            if new_password != confirm_new_password:
-                messages.error(request, 'Mật khẩu mới và xác nhận mật khẩu không khớp.')
-                return render(request, 'vote/change_password.html', {
-                    'change_password_form': change_password_form
-                })
-
             request.user.set_password(new_password)
             request.user.save()
             messages.success(request, 'Đổi mật khẩu thành công!')
             return redirect('vote:index')
+        else:
+            # Giữ lại mật khẩu cũ nếu mật khẩu cũ đúng
+            if old_password and request.user.check_password(old_password):
+                change_password_form.data = change_password_form.data.copy()
+                change_password_form.data['old_password'] = old_password
+    else:
+        change_password_form = ChangePasswordForm()
 
     return render(request, 'vote/change_password.html', {
-        'change_password_form': ChangePasswordForm()
+        'change_password_form': change_password_form
     })
