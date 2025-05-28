@@ -1,29 +1,116 @@
 {% extends "vote/master.html" %}
+{% load static %}
 
 {% block content %}
-<div>
-    <h2>Welcome {{ user.name }}</h2>
-    <a href="{% url 'vote:logout' %}">Logout</a>
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{% url 'vote:index' %}">
+            <i class="fas fa-vote-yea me-2"></i>HỆ THỐNG BẦU CỬ TRỰC TUYẾN
+        </a>
+        <div class="d-flex align-items-center">
+            <div class="text-white me-4">
+                <i class="fas fa-user me-2"></i>{{ user.name }}
+                <span class="ms-2 text-white-50">|</span>
+                <span class="ms-2 text-white-50">Mã cử tri: {{ user.id }}</span>
+            </div>
+            <a href="{% url 'vote:logout' %}" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-5 mt-5">
+    <!-- Thông báo -->
+    {% if messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Danh sách ứng cử viên -->
     {% if candidates %}
-    <div class="d-flex flex-row w-100">
+    <div class="row g-4">
         {% for candidate in candidates %}
-            <div class="card mx-2 p-2">
-                <img src="media/{{ candidate.image }}" class="card-img-top" alt="{{ candidate.name }}" height="300px" style="object-fit: contain">
-                <h2>{{ candidate.name }}</h2>
-                <div class="d-flex flex-row gap-2">
-                    <a href="{% url 'vote:candidate_detail' candidate.id %}" class="btn btn-secondary btn-lg" data-toggle="modal" data-target="#candidateModal{{ candidate.id }}">
-                        View Details
-                    </a>
-                    <form method="POST" action="{% url 'vote:vote' candidate.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-primary btn-lg">Vote</button>
-                    </form>
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <!-- Ảnh ứng cử viên -->
+                    <div class="text-center mb-3">
+                        <img src="{{ candidate.image.url }}" 
+                             class="rounded-circle" 
+                             alt="{{ candidate.name }}" 
+                             style="width: 200px; height: 200px; object-fit: cover;">
+                    </div>
+                    
+                    <!-- Thông tin cơ bản -->
+                    <h4 class="card-title text-center mb-3">{{ candidate.name }}</h4>
+                    <p class="text-muted text-center mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ candidate.district }}
+                    </p>
+                    
+                    <!-- Nút xem chi tiết và bỏ phiếu -->
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'vote:candidate_detail' candidate.id %}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-info-circle me-2"></i>Xem chi tiết
+                        </a>
+                        <form method="POST" action="{% url 'vote:vote' candidate.id %}" class="d-grid">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-vote-yea me-2"></i>Bỏ phiếu
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
+        </div>
         {% endfor %}
     </div>
     {% else %}
-        <p>No candidates available.</p>
+    <div class="alert alert-info text-center">
+        <i class="fas fa-info-circle me-2"></i>Hiện tại chưa có ứng cử viên nào.
+    </div>
     {% endif %}
 </div>
+
+<style>
+body {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.card {
+    background-color: white;
+}
+
+.btn {
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border: none;
+}
+
+.alert {
+    border: none;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,.05);
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+</style>
 {% endblock %}

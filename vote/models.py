@@ -87,7 +87,6 @@ class Candidate(models.Model):
     id = models.CharField(max_length=40, unique=True)
     name = models.CharField(max_length=100)
     birthdate = models.DateField(null=True, blank=True)
-    address = models.CharField(max_length=255)
     district = models.ForeignKey(District, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='images/')
     description = models.TextField(null=True, blank=True)

@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils.http import urlencode
 
+
 from .models import User, Candidate, Vote
 from .forms import LoginForm, RegisterForm
 
@@ -33,6 +34,7 @@ def index(request):
     })
 
 
+
 def login(request):
     if request.user.is_authenticated:
         return redirect('vote:index')
@@ -40,8 +42,6 @@ def login(request):
     next_url = request.GET.get('next', reverse('vote:index'))
 
     if request.method == 'POST':
-        if request.user.is_authenticated:
-            return redirect('vote:index')
         login_form = LoginForm(request.POST)
         if login_form.is_valid():
             id = login_form.cleaned_data['id']
@@ -55,13 +55,28 @@ def login(request):
                     return redirect('admin:index')
                 if next_url:
                     return redirect(next_url)
-            else:
-                return redirect('vote:login')
-    else:
-        return render(request, 'vote/login.html', context={
+                return redirect('vote:index')  # fallback cuối
+
+            # nếu sai tài khoản
+            return render(request, 'vote/login.html', {
+                'login_form': login_form,
+                'next': next_url,
+                'error': 'Sai tài khoản hoặc mật khẩu.'
+            })
+
+        # ❗ THÊM return này nếu form không hợp lệ
+        return render(request, 'vote/login.html', {
+            'login_form': login_form,
             'next': next_url,
-            'login_form': LoginForm(),
+            'error': 'Form không hợp lệ. Vui lòng kiểm tra lại.'
         })
+
+    # GET request
+    return render(request, 'vote/login.html', context={
+        'next': next_url,
+        'login_form': LoginForm(),
+    })
+
 
 
 def logout(request):
@@ -131,8 +146,8 @@ def vote(request, candidate_id):
             candidate=c,
             user=request.user.id,
         )
-        v.cast_vote()
-        # messages.success(request, 'Vote successfully cast!')
+        v.save()
+        messages.success(request, 'Bỏ phiếu thành công!')
         return redirect('vote:index')
 
     return redirect('vote:index')

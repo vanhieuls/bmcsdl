@@ -14,8 +14,21 @@ def bootstrap_class(cls):
 
 @bootstrap_class
 class LoginForm(forms.Form):
-    id = forms.CharField(label='ID', max_length=100)
-    password = forms.CharField(label='Password', widget=forms.PasswordInput)
+    id = forms.CharField(
+        label='ID',
+        max_length=100,
+        widget=forms.TextInput(attrs={'placeholder': 'Nhập ID của bạn'})
+    )
+    password = forms.CharField(
+        label='Mật khẩu',
+        widget=forms.PasswordInput(attrs={'placeholder': 'Nhập mật khẩu của bạn'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.required = True
+            field.error_messages = {'required': ''}
 
 
 @bootstrap_class
