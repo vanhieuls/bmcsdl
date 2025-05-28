@@ -127,7 +127,7 @@ class CustomUserAdmin(admin.ModelAdmin):
         return queryset.filter(district=request.user.district)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "district" and request.user.is_staff:
+        if db_field.name == "district" and request.user.is_staff and request.user.district is not None:
             kwargs["queryset"] = District.objects.filter(id=request.user.district.id)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
