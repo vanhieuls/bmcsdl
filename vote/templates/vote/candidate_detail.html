@@ -1,18 +1,184 @@
 {% extends "vote/master.html" %}
+{% load static %}
 
 {% block content %}
-<div class="container">
-    <h1>{{ candidate.name }}</h1>
-    <img src="{{ candidate.image.url }}" alt="{{ candidate.name }}" class="img-fluid" style="max-height: 80vh;">
-    <p>{{ candidate.birthdate }}</p>
-    <p>{{ candidate.description }}</p>
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{% url 'vote:index' %}">
+            <i class="fas fa-vote-yea me-2"></i>HỆ THỐNG BẦU CỬ TRỰC TUYẾN
+        </a>
+        <div class="d-flex align-items-center">
+            <div class="text-white me-4">
+                <i class="fas fa-user me-2"></i>{{ user.name }}
+                <span class="ms-2 text-white-50">|</span>
+                <span class="ms-2 text-white-50">Mã cử tri: {{ user.id }}</span>
+            </div>
+            <a href="{% url 'vote:logout' %}" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+            </a>
+        </div>
+    </div>
+</nav>
 
-    <form method="POST" action="{% url 'vote:vote' candidate.id %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-primary">Vote</button>
-    </form>
+<div class="container py-5 mt-5">
+    <!-- Nút quay lại -->
+    <div class="mb-4">
+        <a href="{% url 'vote:index' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
+        </a>
+    </div>
 
-    <a href="{% url 'vote:index' %}" class="btn btn-secondary">Back to Candidates</a>
+    <!-- Thông tin ứng cử viên -->
+    <div class="row g-4">
+        <!-- Ảnh và thông tin cơ bản -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="image-container mb-3">
+                            <img src="{{ candidate.image.url }}" 
+                                 class="rounded-circle candidate-image" 
+                                 alt="{{ candidate.name }}">
+                        </div>
+                        <h2 class="mb-2">{{ candidate.name }}</h2>
+                        <div class="badge bg-primary mb-3">
+                            <i class="fas fa-map-marker-alt me-2"></i>{{ candidate.district }}
+                        </div>
+                    </div>
+                    
+                    <!-- Thông tin cá nhân -->
+                    <div class="info-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-user me-2"></i>Thông tin cá nhân
+                        </h5>
+                        <div class="info-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Ngày sinh: {{ candidate.birthdate|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin chi tiết -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <!-- Chương trình hành động -->
+                    <div class="info-section">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="section-title mb-0">
+                                <i class="fas fa-tasks me-2"></i>Chương trình hành động
+                            </h5>
+                            <form method="POST" action="{% url 'vote:vote' candidate.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-vote-yea me-2"></i>Bỏ phiếu
+                                </button>
+                            </form>
+                        </div>
+                        <div class="content-box">
+                            {{ candidate.description|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<style>
+body {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.card {
+    background-color: white;
+}
+
+.image-container {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    margin: 0 auto;
+}
+
+.candidate-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 4px solid #e9ecef;
+}
+
+.section-title {
+    color: #212529;
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.info-section {
+    margin-bottom: 30px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    color: #495057;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.info-item i {
+    width: 30px;
+    margin-right: 15px;
+    color: #0d6efd;
+}
+
+.content-box {
+    color: #495057;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+.badge {
+    font-size: 1rem;
+    padding: 8px 16px;
+}
+
+.btn {
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+}
+
+.btn-outline-primary {
+    border-width: 2px;
+}
+</style>
 {% endblock %}

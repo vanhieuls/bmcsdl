@@ -28,6 +28,11 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+PASSWORD_HASHERS = [
+    'vote.hashers.BcryptHasher',
+    # 'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

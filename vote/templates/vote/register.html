@@ -1,11 +1,252 @@
 {% extends "vote/master.html" %}
+{% load bootstrap5 %}
+{% load static %}
 
 {% block content %}
-<form class="m-3" method="POST" action="{% url 'vote:register' %}" style="width: 20rem">
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-10 col-lg-8">
+            <div class="card border-0" style="background-color: rgba(255, 255, 255, 0.2); backdrop-filter: blur(20px);">
+                <div class="card-header bg-transparent border-0 text-center py-4">
+                    <h5 class="mb-0 text-white fw-bold">ĐĂNG KÝ TÀI KHOẢN CỬ TRI</h5>
+                    <div class="text-light small mt-2">Vui lòng điền đầy đủ thông tin bên dưới</div>
+                </div>
+                <div class="card-body px-4 py-3">
+                    <form method="post" class="needs-validation" novalidate>
     {% csrf_token %}
-    {{ register_form }}
-    <br>
-    <a href="{% url 'vote:login' %}" class="btn btn-secondary btn-lg">Login</a>
-    <button type="submit" class="btn btn-primary btn-lg">Register</button>
+                        <div class="row">
+                            <!-- Cột trái -->
+                            <div class="col-md-6">
+                                <!-- ID field -->
+                                <div class="mb-3">
+                                    <label for="id_id" class="form-label">Mã cử tri</label>
+                                    <input type="text" 
+                                           name="id" 
+                                           class="form-control" 
+                                           id="id_id" 
+                                           required
+                                           oninvalid="this.setCustomValidity('Vui lòng nhập mã cử tri')"
+                                           oninput="this.setCustomValidity('')">
+                                    <div class="invalid-feedback">
+                                        Vui lòng nhập mã cử tri
+                                    </div>
+                                </div>
+
+                                <!-- Name field -->
+                                <div class="mb-3">
+                                    <label for="id_name" class="form-label">Họ và tên</label>
+                                    <input type="text" 
+                                           name="name" 
+                                           class="form-control" 
+                                           id="id_name" 
+                                           required
+                                           oninvalid="this.setCustomValidity('Vui lòng nhập họ và tên')"
+                                           oninput="this.setCustomValidity('')">
+                                    <div class="invalid-feedback">
+                                        Vui lòng nhập họ và tên
+                                    </div>
+                                </div>
+
+                                <!-- Password field -->
+                                <div class="mb-3">
+                                    <label for="id_password" class="form-label">Mật khẩu</label>
+                                    <input type="password" 
+                                           name="password" 
+                                           class="form-control" 
+                                           id="id_password" 
+                                           required
+                                           oninvalid="this.setCustomValidity('Vui lòng nhập mật khẩu')"
+                                           oninput="this.setCustomValidity('')">
+                                    <div class="invalid-feedback">
+                                        Vui lòng nhập mật khẩu
+                                    </div>
+                                </div>
+
+                                <!-- Password confirm field -->
+                                <div class="mb-3">
+                                    <label for="id_password_confirm" class="form-label">Xác nhận mật khẩu</label>
+                                    <input type="password" 
+                                           name="password_confirm" 
+                                           class="form-control" 
+                                           id="id_password_confirm" 
+                                           required
+                                           oninvalid="this.setCustomValidity('Vui lòng xác nhận mật khẩu')"
+                                           oninput="this.setCustomValidity('')">
+                                    <div class="invalid-feedback">
+                                        Vui lòng xác nhận mật khẩu
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cột phải -->
+                            <div class="col-md-6">
+                                <!-- Email field -->
+                                <div class="mb-3">
+                                    <label for="id_email" class="form-label">Email</label>
+                                    <input type="email" 
+                                           name="email" 
+                                           class="form-control" 
+                                           id="id_email" 
+                                           required
+                                           oninvalid="this.setCustomValidity('Vui lòng nhập email hợp lệ')"
+                                           oninput="this.setCustomValidity('')">
+                                    <div class="invalid-feedback">
+                                        Vui lòng nhập email hợp lệ
+                                    </div>
+                                </div>
+
+                                <!-- Birthdate field -->
+                                <div class="mb-3">
+                                    <label for="id_birthdate" class="form-label">Ngày sinh</label>
+                                    <input type="date" 
+                                           name="birthdate" 
+                                           class="form-control" 
+                                           id="id_birthdate" 
+                                           required
+                                           oninvalid="this.setCustomValidity('Vui lòng chọn ngày sinh')"
+                                           oninput="this.setCustomValidity('')">
+                                    <div class="invalid-feedback">
+                                        Vui lòng chọn ngày sinh
+                                    </div>
+                                </div>
+
+                                <!-- Address field -->
+                                <div class="mb-3">
+                                    <label for="id_address" class="form-label">Địa chỉ</label>
+                                    <input type="text" 
+                                           name="address" 
+                                           class="form-control" 
+                                           id="id_address" 
+                                           required
+                                           oninvalid="this.setCustomValidity('Vui lòng nhập địa chỉ')"
+                                           oninput="this.setCustomValidity('')">
+                                    <div class="invalid-feedback">
+                                        Vui lòng nhập địa chỉ
+                                    </div>
+                                </div>
+
+                                <!-- District field -->
+                                <div class="mb-3">
+                                    <label for="id_district" class="form-label">Quận/Huyện</label>
+                                    <input type="text" 
+                                           name="district" 
+                                           class="form-control" 
+                                           id="id_district" 
+                                           required
+                                           oninvalid="this.setCustomValidity('Vui lòng nhập quận/huyện')"
+                                           oninput="this.setCustomValidity('')">
+                                    <div class="invalid-feedback">
+                                        Vui lòng nhập quận/huyện
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-light btn-sm py-2 fw-bold text-dark">
+                                <i class="fas fa-user-plus me-2"></i>ĐĂNG KÝ
+                            </button>
+                        </div>
 </form>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-center py-3">
+                    <div class="small text-light">
+                        Đã có tài khoản? 
+                        <a href="{% url 'vote:login' %}" class="text-decoration-none text-white fw-medium">
+                            <i class="fas fa-sign-in-alt me-1"></i> Đăng nhập
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Client-side validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var form = document.querySelector('.needs-validation');
+        form.addEventListener('submit', function(event) {
+            if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    }, false);
+})();
+</script>
+
+<style>
+body {
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), 
+                url('https://res.cloudinary.com/dwbcqjupj/image/upload/v1748363217/01_9_i1cs17.jpg');
+    background-size: cover;
+    background-position: center 15%;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    overflow-y: hidden;
+}
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+.form-control {
+    border-radius: 5px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    background-image: none !important;
+}
+.form-control:focus {
+    border-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.1);
+}
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+.form-label {
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0.3rem;
+}
+.btn-light {
+    background-color: rgba(255, 255, 255, 0.9);
+    transition: all 0.2s ease;
+}
+.btn-light:hover {
+    background-color: white;
+    transform: translateY(-1px);
+}
+.was-validated .form-control:valid {
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+.was-validated .form-control:invalid {
+    border-color: #ff6b6b;
+}
+.invalid-feedback {
+    display: none;
+    color: #ff6b6b;
+    font-size: 0.8rem;
+    position: absolute;
+    margin-top: 0.25rem;
+    width: 100%;
+}
+.mb-3 {
+    position: relative;
+    margin-bottom: 1.5rem !important;
+}
+.was-validated .form-control:invalid ~ .invalid-feedback {
+    display: block;
+}
+</style>
 {% endblock %}

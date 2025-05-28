@@ -9,6 +9,6 @@ urlpatterns = [
     path("login/", views.login, name="login"),
     path("logout/", views.logout, name="logout"),
     path("register/", views.register, name="register"),
-    path("candidates/<int:candidate_id>/", views.candidate_detail, name="candidate_detail"),
-    path("vote/<int:candidate_id>/", views.vote, name="vote"),
+    path("candidates/<str:candidate_id>/", views.candidate_detail, name="candidate_detail"),
+    path("vote/<str:candidate_id>/", views.vote, name="vote"),
 ]

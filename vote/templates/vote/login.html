@@ -1,13 +1,134 @@
-{% extends "vote/master.html" %}
+{% extends 'vote/master.html' %}
+{% load bootstrap5 %}
+{% load static %}
 
 {% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0" style="background-color: rgba(255, 255, 255, 0.2); backdrop-filter: blur(20px);">
+                <div class="card-header bg-transparent border-0 text-center py-2">
+                    <h5 class="mb-0 text-white fw-bold">HỆ THỐNG BẦU CỬ TRỰC TUYẾN</h5>
+                    <div class="text-light small mt-2">Vui lòng đăng nhập để tham gia bầu cử</div>
+                </div>
+                <div class="card-body px-4 py-3 text-white">
+                    <form method="POST" action="{% url 'vote:login' %}" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        {{ login_form }}
+                        <input type="hidden" name="next" value="{{ next }}">
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-light btn-sm py-2 fw-bold text-dark">
+                                <i class="fas fa-lock me-2"></i>ĐĂNG NHẬP
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-center py-3">
+                    <div class="small text-light">
+                        <a href="{% url 'vote:register' %}" class="text-decoration-none text-white fw-medium">
+                            <i class="fas fa-user-plus me-1"></i> Đăng ký tài khoản cử tri
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<form method="POST" action="{% url 'vote:login' %}" class="m-3" style="width: 20rem">
-    {% csrf_token %}
-    {{ login_form }}
-    <br>
-    <a href="{% url 'vote:register' %}" class="btn btn-secondary btn-lg">Register</a>
-    <button type="submit" class="btn btn-primary btn-lg">Log in</button>
-</form>
+<script>
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var form = document.querySelector('.needs-validation');
+        form.addEventListener('submit', function(event) {
+            if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    }, false);
+})();
+</script>
 
+<style>
+body {
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), 
+                url('https://res.cloudinary.com/dwbcqjupj/image/upload/v1748363217/01_9_i1cs17.jpg');
+    background-size: cover;
+    background-position: center 15%;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    overflow-y: hidden;
+}
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+.form-control {
+    border-radius: 5px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.1)  !important;
+    color: white !important;
+    background-image: none !important;
+}
+.form-control:focus {
+    border-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.1);
+}
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+.form-label {
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0.3rem;
+}
+.btn-light {
+    background-color: rgba(255, 255, 255, 0.9);
+    transition: all 0.2s ease;
+}
+.btn-light:hover {
+    background-color: white;
+    transform: translateY(-1px);
+}
+.was-validated .form-control:valid {
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+.was-validated .form-control:invalid {
+    border-color: #ff6b6b;
+}
+.invalid-feedback {
+    display: none;
+    color: #ff6b6b;
+    font-size: 0.8rem;
+    position: absolute;
+    margin-top: 0.25rem;
+    width: 100%;
+}
+.mb-3 {
+    position: relative;
+    margin-bottom: 1.5rem !important;
+}
+.was-validated .form-control:invalid ~ .invalid-feedback {
+    display: none !important;
+}
+.help-block {
+    display: none !important;
+}
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus {
+    -webkit-text-fill-color: white !important;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.1) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+</style>
 {% endblock %}
