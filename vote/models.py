@@ -54,7 +54,7 @@ class User(AbstractUser):
     first_name = None
     last_name = None
     id = models.CharField(max_length=40, unique=True, primary_key=True, validators=[validate_id])
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=1000)
     birthdate = models.DateField(null=True, blank=True)
     address = models.CharField(max_length=255)
     district = models.ForeignKey(District, on_delete=models.CASCADE, null=True)
@@ -82,11 +82,21 @@ class User(AbstractUser):
         if not self.password:
             self.set_password(None)
 
-        with connection.cursor() as cursor:
-            cursor.execute(
-                'EXECUTE dbo.SP_InsertEncryptedUser @id = %s, @name = %s, @birthdate = %s, @address = %s, @district_id = %s, @email = %s, @password = %s, @last_login = %s, @is_superuser = %s, @is_staff = %s, @is_active = 1',
-                [self.id, self.name, self.birthdate, self.address, self.district_id, self.email, self.password, self.last_login, self.is_superuser, self.is_staff]
-            )
+        # if user exists
+        if self.name is None:
+            return
+        if self._state.adding:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    'EXECUTE dbo.SP_InsertEncryptedUser @id = %s, @name = %s, @birthdate = %s, @address = %s, @district_id = %s, @email = %s, @password = %s, @last_login = %s, @is_superuser = %s, @is_staff = %s, @is_active = 1',
+                    [self.id, self.name, self.birthdate, self.address, self.district_id, self.email, self.password, self.last_login, self.is_superuser, self.is_staff]
+                )
+        else:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    'EXECUTE dbo.SP_UpdateEncryptedUser @id = %s, @name = %s, @birthdate = %s, @address = %s, @district_id = %s, @email = %s, @password = %s, @last_login = %s, @is_superuser = %s, @is_staff = %s, @is_active = 1',
+                    [self.id, self.name, self.birthdate, self.address, self.district_id, self.email, self.password, self.last_login, self.is_superuser, self.is_staff]
+                )
 
     @classmethod
     def from_db(cls, db, field_names, values):

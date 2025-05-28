@@ -83,9 +83,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'VOTE',
-        'USER': 'nguyenvanhieu',
-        'PASSWORD': '123456',
-        'HOST': 'LAPTOP-16839ORI\\SQLEXPRESS',
+        'USER': 'sa',
+        'PASSWORD': '',
+        'HOST': 'localhost',
         'PORT': '',
 
         'OPTIONS': {

@@ -38,7 +38,6 @@ def index(request):
     })
 
 
-
 def login(request):
     if request.user.is_authenticated:
         return redirect('vote:index')
