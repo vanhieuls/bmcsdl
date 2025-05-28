@@ -10,6 +10,15 @@ def validate_id(value: str):
     return True
 
 
+class District(models.Model):
+    short_name = models.CharField(max_length=10)
+    long_name = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.short_name} - {self.long_name}"
+
+
 class UserManager(BaseUserManager):
     def create_user(self, id, password, *args, **kwargs):
         if not id:
@@ -46,8 +55,9 @@ class User(AbstractUser):
     name = models.CharField(max_length=100)
     birthdate = models.DateField(null=True, blank=True)
     address = models.CharField(max_length=255)
-    district = models.CharField(max_length=100)
+    district = models.ForeignKey(District, on_delete=models.CASCADE)
     email = models.EmailField()
+    voted = models.BooleanField(default=False, editable=False)
 
     objects = UserManager()
 
@@ -72,15 +82,6 @@ class User(AbstractUser):
             self.set_password(None)
 
         super().save(*args, **kwargs)
-
-
-class District(models.Model):
-    short_name = models.CharField(max_length=10)
-    long_name = models.CharField(max_length=100)
-    description = models.TextField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.short_name} - {self.long_name}"
 
 
 class Term(models.Model):
