@@ -13,7 +13,7 @@ from .models import Candidate, User, District, Term
 
 class CandidateAdmin(admin.ModelAdmin):
     readonly_fields = ["votes", "image_tag"]
-    list_display = ["name", "district", "image_tag", "votes"]
+    list_display = ["name", "district", "image_tag", "get_vote_count"]
     list_filter = ["district"]
 
 

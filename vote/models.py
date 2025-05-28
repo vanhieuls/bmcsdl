@@ -94,6 +94,12 @@ class Candidate(models.Model):
     def image_tag(self):
         return mark_safe('<img src="/media/%s" width="150" style="max-height: 200px;object-fit: cover;" />' % self.image)
 
+    def get_vote_count(self):
+        votes = Vote.objects.filter(candidate=self.id).values_list('user', flat=True)
+        votes = votes.distinct()
+        print(votes)
+        return votes.count()
+
     image_tag.short_description = 'Image'
 
 
@@ -106,7 +112,12 @@ class Vote(models.Model):
         return f"{self.user} voted for {self.candidate}"
 
     def save(self, *args, **kwargs):
-        # TODO: add encryption here
-        # self.candidate.id = self.candidate.id + 1
-        print("Saving Vote:", self.candidate, self.user)
+        # # TODO: add encryption here
+        # # self.candidate.id = self.candidate.id + 1
+        # print("Saving Vote:", self.candidate, self.user)
         super().save(*args, **kwargs)
+
+        # Increment the candidate's vote count
+        # candidate = Candidate.objects.get(id=self.candidate)
+        # candidate.votes += 1
+        # candidate.save()
