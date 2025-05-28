@@ -27,12 +27,12 @@ def check_authentication(f):
 
 @check_authentication
 def index(request):
-    candidates = Candidate.objects.all()
+    # print("User is authenticated:", request.user.district)
+    candidates = Candidate.objects.filter(district=request.user.district)
 
     return render(request, 'vote/index.html', context={
         'candidates': candidates,
     })
-
 
 
 def login(request):
@@ -76,7 +76,6 @@ def login(request):
         'next': next_url,
         'login_form': LoginForm(),
     })
-
 
 
 def logout(request):
@@ -146,7 +145,7 @@ def vote(request, candidate_id):
             candidate=c,
             user=request.user.id,
         )
-        v.save()
+        v.cast_vote()
         messages.success(request, 'Bỏ phiếu thành công!')
         return redirect('vote:index')
 
