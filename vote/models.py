@@ -4,6 +4,12 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.models import AbstractUser
 
 
+def validate_id(value: str):
+    if len(value) < 3:
+        raise ValueError("ID must be at least 3 characters long")
+    return True
+
+
 class UserManager(BaseUserManager):
     def create_user(self, id, password, *args, **kwargs):
         if not id:
@@ -36,7 +42,7 @@ class User(AbstractUser):
     username = None
     first_name = None
     last_name = None
-    id = models.CharField(max_length=40, unique=True, primary_key=True)
+    id = models.CharField(max_length=40, unique=True, primary_key=True, validators=[validate_id])
     name = models.CharField(max_length=100)
     birthdate = models.DateField(null=True, blank=True)
     address = models.CharField(max_length=255)
@@ -95,9 +101,11 @@ class Candidate(models.Model):
         return mark_safe('<img src="/media/%s" width="150" style="max-height: 200px;object-fit: cover;" />' % self.image)
 
     def get_vote_count(self):
-        votes = Vote.objects.filter(candidate=self.id).values_list('user', flat=True)
-        votes = votes.distinct()
-        return votes.count()
+        # votes = Vote.objects.filter(candidate=self.id).values_list('user', flat=True)
+        # votes = votes.distinct()
+        # return votes.count()
+        print(self.id)
+        return 0
 
     image_tag.short_description = 'Image'
 
