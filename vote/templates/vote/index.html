@@ -9,14 +9,26 @@
             <i class="fas fa-vote-yea me-2"></i>HỆ THỐNG BẦU CỬ TRỰC TUYẾN
         </a>
         <div class="d-flex align-items-center">
-            <div class="text-white me-4">
-                <i class="fas fa-user me-2"></i>{{ user.name }}
-                <span class="ms-2 text-white-50">|</span>
-                <span class="ms-2 text-white-50">Mã cử tri: {{ user.id }}</span>
+            <div class="dropdown">
+                <button class="btn btn-link text-white text-decoration-none dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user me-2"></i>{{ user.name }}
+                    <span class="ms-2 text-white-50">|</span>
+                    <span class="ms-2 text-white-50">Mã cử tri: {{ user.id }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li>
+                        <a class="dropdown-item" href="{% url 'vote:change_password' %}">
+                            <i class="fas fa-key me-2"></i>Đổi mật khẩu
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item text-danger" href="{% url 'vote:logout' %}">
+                            <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                        </a>
+                    </li>
+                </ul>
             </div>
-            <a href="{% url 'vote:logout' %}" class="btn btn-outline-light btn-sm">
-                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
-            </a>
         </div>
     </div>
 </nav>

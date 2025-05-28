@@ -44,22 +44,59 @@ class RegisterForm(forms.Form):
 
 
 class ChangePasswordForm(forms.Form):
-    old_password = forms.CharField(label='Old Password', widget=forms.PasswordInput)
-    new_password = forms.CharField(label='New Password', widget=forms.PasswordInput)
-    confirm_new_password = forms.CharField(label='Confirm New Password', widget=forms.PasswordInput)
+    old_password = forms.CharField(
+        label='Mật khẩu hiện tại',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control password-field',
+            'placeholder': 'Nhập mật khẩu hiện tại',
+            'autocomplete': 'current-password',
+            'id': 'old_password'
+        })
+    )
+    new_password = forms.CharField(
+        label='Mật khẩu mới',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control password-field',
+            'placeholder': 'Nhập mật khẩu mới',
+            'autocomplete': 'new-password',
+            'id': 'new_password'
+        })
+    )
+    confirm_new_password = forms.CharField(
+        label='Xác nhận mật khẩu mới',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control password-field',
+            'placeholder': 'Nhập lại mật khẩu mới',
+            'autocomplete': 'new-password',
+            'id': 'confirm_password'
+        })
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'
             field.required = True
-            field.error_messages = {'required': ''}
+            field.error_messages = {
+                'required': 'Vui lòng nhập đầy đủ thông tin'
+            }
 
     def clean(self):
         cleaned_data = super().clean()
         new_password = cleaned_data.get('new_password')
         confirm_new_password = cleaned_data.get('confirm_new_password')
 
-        if new_password != confirm_new_password:
-            raise forms.ValidationError("New password and confirmation do not match.")
+        if new_password and confirm_new_password:
+            if new_password != confirm_new_password:
+                raise forms.ValidationError("Mật khẩu mới và xác nhận mật khẩu không khớp.")
+            
+            if len(new_password) < 8:
+                raise forms.ValidationError("Mật khẩu mới phải có ít nhất 8 ký tự.")
+            
+            if not any(char.isdigit() for char in new_password):
+                raise forms.ValidationError("Mật khẩu mới phải chứa ít nhất một số.")
+            
+            if not any(char.isupper() for char in new_password):
+                raise forms.ValidationError("Mật khẩu mới phải chứa ít nhất một chữ hoa.")
 
         return cleaned_data

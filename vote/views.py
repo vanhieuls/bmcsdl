@@ -5,6 +5,7 @@ from django.contrib import auth
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils.http import urlencode
+from django.http import JsonResponse
 
 
 from .models import User, Candidate, Vote
@@ -29,10 +30,13 @@ def check_authentication(f):
 def index(request):
     # print("User is authenticated:", request.user.district)
     candidates = Candidate.objects.filter(district=request.user.district)
+    change_password_form = ChangePasswordForm()
 
     return render(request, 'vote/index.html', context={
         'candidates': candidates,
+        'change_password_form': change_password_form,
     })
+
 
 
 def login(request):
@@ -76,7 +80,6 @@ def login(request):
         'next': next_url,
         'login_form': LoginForm(),
     })
-
 
 def logout(request):
     auth.logout(request)
@@ -165,19 +168,22 @@ def change_password(request):
             confirm_new_password = change_password_form.cleaned_data['confirm_new_password']
 
             if not request.user.check_password(old_password):
-                messages.error(request, 'Mật khẩu cũ không đúng.')
-                return redirect('vote:change_password')
+                messages.error(request, 'Mật khẩu hiện tại không đúng.')
+                return render(request, 'vote/change_password.html', {
+                    'change_password_form': change_password_form
+                })
 
             if new_password != confirm_new_password:
-                messages.error(request, 'Mật khẩu mới không khớp.')
-                return redirect('vote:change_password')
+                messages.error(request, 'Mật khẩu mới và xác nhận mật khẩu không khớp.')
+                return render(request, 'vote/change_password.html', {
+                    'change_password_form': change_password_form
+                })
 
             request.user.set_password(new_password)
             request.user.save()
             messages.success(request, 'Đổi mật khẩu thành công!')
             return redirect('vote:index')
-    else:
-        change_password_form = ChangePasswordForm()
-    return render(request, 'vote/change_password.html', context={
-        'change_password_form': change_password_form,
+
+    return render(request, 'vote/change_password.html', {
+        'change_password_form': ChangePasswordForm()
     })
