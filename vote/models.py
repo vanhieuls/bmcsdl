@@ -101,10 +101,10 @@ class Candidate(models.Model):
         return mark_safe('<img src="/media/%s" width="150" style="max-height: 200px;object-fit: cover;" />' % self.image)
 
     def get_vote_count(self):
-        # votes = Vote.objects.filter(candidate=self.id).values_list('user', flat=True)
-        # votes = votes.distinct()
-        # return votes.count()
-        print(self.id)
+        with connection.cursor() as cursor:
+            cursor.execute('EXECUTE dbo.SP_CountFinalVotesByCandidate @candidate_id = %s', [self.id])
+            if cursor.description:
+                return cursor.fetchone()[0]
         return 0
 
     image_tag.short_description = 'Image'
@@ -122,7 +122,6 @@ class Vote(models.Model):
         return Vote.objects.filter(candidate=self.candidate).count()
 
     def cast_vote(self):
-        print(self.user, self.candidate.id)
         with connection.cursor() as cursor:
             cursor.execute('use VOTE; EXECUTE dbo.SP_InsertEncryptedVote @user = %s, @candidate_id = %s', [self.user, self.candidate.id])
 
