@@ -102,6 +102,8 @@ class User(AbstractUser):
         with connection.cursor() as cursor:
             cursor.execute('EXECUTE dbo.SP_GetFinalVoteByUser @user_id = %s', [self.id])
             if cursor.description:
+                if cursor.fetchone() is None:
+                    return False
                 return cursor.fetchone()[0]
         return False
 
