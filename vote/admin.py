@@ -54,7 +54,8 @@ class CandidateAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        queryset = queryset.filter(district=request.user.district)
+        if not request.user.is_superuser:
+            queryset = queryset.filter(district=request.user.district)
         return queryset.annotate(vote_count=Count('vote'))
 
     @admin.display(description="Votes", ordering='vote_count')
@@ -62,7 +63,7 @@ class CandidateAdmin(admin.ModelAdmin):
         return obj.get_vote_count()
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "district" and request.user.is_superuser:
+        if db_field.name == "district" and not request.user.is_superuser:
             kwargs["queryset"] = District.objects.filter(id=request.user.district.id)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 

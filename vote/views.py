@@ -28,6 +28,9 @@ def check_authentication(f):
 
 @check_authentication
 def index(request):
+    if request.user.is_staff:
+        return redirect('admin:index')
+
     candidates = Candidate.objects.filter(district=request.user.district)
     voted = request.user.get_voted()
     change_password_form = ChangePasswordForm()
