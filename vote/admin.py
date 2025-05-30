@@ -154,7 +154,8 @@ class CustomUserAdmin(ImportExportModelAdmin):
         queryset = super().get_queryset(request)
         if not request.user.is_superuser:
             queryset = queryset.filter(Q(is_staff=False, is_superuser=False))
-        return queryset.filter(district=request.user.district)
+            queryset = queryset.filter(district=request.user.district)
+        return queryset
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "district" and not request.user.is_superuser and request.user.district is not None:
