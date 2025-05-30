@@ -8,8 +8,36 @@ from django.utils.html import format_html
 from rangefilter.filters import (
     DateRangeQuickSelectListFilterBuilder,
 )
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 
 from .models import Candidate, User, District, Term, Vote
+
+
+class UserResource(resources.ModelResource):
+    class Meta:
+        model = User
+        fields = ('id', 'name', 'email', 'district', 'birthdate', 'address')
+        export_order = ('id', 'name', 'email', 'district', 'birthdate', 'address')
+
+    def skip_row(self, instance, original, row, import_validation_errors=None):
+        if not row.get('district') or row.get('district') == 'None' or row.get('district') == '':
+            return True
+        if not row.get('id') or row.get('id') == 'None' or row.get('id') == '':
+            return True
+        if not row.get('email') or row.get('email') == 'None' or row.get('email') == '':
+            return True
+        if not row.get('name') or row.get('name') == 'None' or row.get('name') == '':
+            return True
+        if not row.get('address') or row.get('address') == 'None' or row.get('address') == '':
+            return True
+        if not row.get('birthdate') or row.get('birthdate') == 'None' or row.get('birthdate') == '':
+            return True
+        if row.get('birthdate'):
+            from datetime import datetime
+            if (datetime.now() - row.get('birthdate')).days < 18 * 365:
+                return True
+        return super().skip_row(instance, original, row, import_validation_errors)
 
 
 class CustomUserChangeList(ChangeList):
@@ -50,7 +78,9 @@ class CustomUserChangeForm(UserChangeForm):
         fields = '__all__'
 
 
-class CustomUserAdmin(admin.ModelAdmin):
+class CustomUserAdmin(ImportExportModelAdmin):
+    resource_classes = [UserResource]
+
     form = CustomUserChangeForm
     exclude = ["username"]
     list_display = ["id", "name", "email", "district", "show_voted"]
@@ -123,11 +153,11 @@ class CustomUserAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         if not request.user.is_superuser:
-            queryset = queryset.filter(Q(is_staff=False, is_superuser=False) | Q(id=request.user.id))
+            queryset = queryset.filter(Q(is_staff=False, is_superuser=False))
         return queryset.filter(district=request.user.district)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "district" and request.user.is_staff and request.user.district is not None:
+        if db_field.name == "district" and not request.user.is_superuser and request.user.district is not None:
             kwargs["queryset"] = District.objects.filter(id=request.user.district.id)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 

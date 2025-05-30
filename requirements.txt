@@ -18,3 +18,5 @@ typing_extensions
 tzdata
 django-admin-rangefilter
 bcrypt
+tablib[xlsx]
+django-import-export
