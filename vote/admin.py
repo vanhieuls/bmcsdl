@@ -1,8 +1,10 @@
 from django.contrib import admin
+from django.contrib.admin.views.main import ChangeList
 from django.contrib.auth.forms import UserChangeForm, AdminPasswordChangeForm
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.template.response import TemplateResponse
+from django.utils.html import format_html
 from rangefilter.filters import (
     DateRangeQuickSelectListFilterBuilder,
 )
@@ -10,8 +12,15 @@ from rangefilter.filters import (
 from .models import Candidate, User, District, Term, Vote
 
 
+class CustomUserChangeList(ChangeList):
+    def url_for_result(self, result):
+        if result.is_staff and result != self.model_admin.request.user:
+            return None
+        return super().url_for_result(result)
+
+
 class CandidateAdmin(admin.ModelAdmin):
-    readonly_fields = ["votes", "image_tag"]
+    readonly_fields = ["image_tag"]
     list_display = ["name", "district", "image_tag", "vote_count"]
     list_filter = ["district"]
 
@@ -44,7 +53,7 @@ class CustomUserChangeForm(UserChangeForm):
 class CustomUserAdmin(admin.ModelAdmin):
     form = CustomUserChangeForm
     exclude = ["username"]
-    list_display = ["id", "name", "email", "district", "voted"]
+    list_display = ["id", "name", "email", "district", "show_voted"]
     fields = [
         "id",
         "name",
@@ -101,12 +110,24 @@ class CustomUserAdmin(admin.ModelAdmin):
         ]
         return custom_urls + urls
 
+    def show_voted(self, obj):
+        if obj.is_staff:
+            return ""
+        if obj.voted:
+            return format_html('<img src="/static/admin/img/icon-yes.svg" alt="False">')
+        return format_html('<img src="/static/admin/img/icon-no.svg" alt="False">')
+
+    show_voted.short_description = "Voted"
+    show_voted.admin_order_field = 'voted'
+
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
+        if not request.user.is_superuser:
+            queryset = queryset.filter(Q(is_staff=False, is_superuser=False) | Q(id=request.user.id))
         return queryset.filter(district=request.user.district)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "district" and request.user.is_superuser:
+        if db_field.name == "district" and request.user.is_staff and request.user.district is not None:
             kwargs["queryset"] = District.objects.filter(id=request.user.district.id)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 

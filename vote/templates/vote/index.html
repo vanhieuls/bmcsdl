@@ -73,9 +73,18 @@
                         </a>
                         <form method="POST" action="{% url 'vote:vote' candidate.id %}" class="d-grid">
                             {% csrf_token %}
+                            {% if candidate.id == voted %}
+                            <button type="button" class="btn btn-success disabled">
+                                <i class="fas fa-check me-2"></i>Đã bỏ phiếu
+                            </button>
+                            {% else %}
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-vote-yea me-2"></i>Bỏ phiếu
                             </button>
+                            {% endif %}
+{#                            <button type="submit" class="btn btn-primary">#}
+{#                                <i class="fas fa-vote-yea me-2"></i>Bỏ phiếu#}
+{#                            </button>#}
                         </form>
                     </div>
                 </div>

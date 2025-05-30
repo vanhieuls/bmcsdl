@@ -54,7 +54,7 @@ class User(AbstractUser):
     first_name = None
     last_name = None
     id = models.CharField(max_length=40, unique=True, primary_key=True, validators=[validate_id])
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=1000)
     birthdate = models.DateField(null=True, blank=True)
     address = models.CharField(max_length=255)
     district = models.ForeignKey(District, on_delete=models.CASCADE, null=True)
@@ -82,11 +82,28 @@ class User(AbstractUser):
         if not self.password:
             self.set_password(None)
 
+        # if user exists
+        if self.name is None:
+            return
+        if self._state.adding:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    'EXECUTE dbo.SP_InsertEncryptedUser @id = %s, @name = %s, @birthdate = %s, @address = %s, @district_id = %s, @email = %s, @password = %s, @last_login = %s, @is_superuser = %s, @is_staff = %s, @is_active = 1',
+                    [self.id, self.name, self.birthdate, self.address, self.district_id, self.email, self.password, self.last_login, self.is_superuser, self.is_staff]
+                )
+        else:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    'EXECUTE dbo.SP_UpdateEncryptedUser @id = %s, @name = %s, @birthdate = %s, @address = %s, @district_id = %s, @email = %s, @password = %s, @last_login = %s, @is_superuser = %s, @is_staff = %s, @is_active = 1',
+                    [self.id, self.name, self.birthdate, self.address, self.district_id, self.email, self.password, self.last_login, self.is_superuser, self.is_staff]
+                )
+
+    def get_voted(self):
         with connection.cursor() as cursor:
-            cursor.execute(
-                'EXECUTE dbo.SP_InsertEncryptedUser @id = %s, @name = %s, @birthdate = %s, @address = %s, @district_id = %s, @email = %s, @password = %s, @last_login = %s, @is_superuser = %s, @is_staff = %s, @is_active = 1',
-                [self.id, self.name, self.birthdate, self.address, self.district_id, self.email, self.password, self.last_login, self.is_superuser, self.is_staff]
-            )
+            cursor.execute('EXECUTE dbo.SP_GetFinalVoteByUser @user_id = %s', [self.id])
+            if cursor.description:
+                return cursor.fetchone()[0]
+        return False
 
     @classmethod
     def from_db(cls, db, field_names, values):
@@ -127,7 +144,6 @@ class Candidate(models.Model):
     image = models.ImageField(upload_to='images/')
     description = models.TextField(null=True, blank=True)
     term = models.ForeignKey(Term, on_delete=models.CASCADE)
-    votes = models.IntegerField(default=0, editable=False)
 
     def __str__(self):
         return f"{self.name} - {self.district}"
