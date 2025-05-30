@@ -28,12 +28,13 @@ def check_authentication(f):
 
 @check_authentication
 def index(request):
-    # print("User is authenticated:", request.user.district)
     candidates = Candidate.objects.filter(district=request.user.district)
+    voted = request.user.get_voted()
     change_password_form = ChangePasswordForm()
 
     return render(request, 'vote/index.html', context={
         'candidates': candidates,
+        'voted': voted,
         'change_password_form': change_password_form,
     })
 
@@ -79,6 +80,7 @@ def login(request):
         'next': next_url,
         'login_form': LoginForm(),
     })
+
 
 def logout(request):
     auth.logout(request)

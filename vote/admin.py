@@ -20,7 +20,7 @@ class CustomUserChangeList(ChangeList):
 
 
 class CandidateAdmin(admin.ModelAdmin):
-    readonly_fields = ["votes", "image_tag"]
+    readonly_fields = ["image_tag"]
     list_display = ["name", "district", "image_tag", "vote_count"]
     list_filter = ["district"]
 

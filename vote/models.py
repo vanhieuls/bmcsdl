@@ -98,6 +98,13 @@ class User(AbstractUser):
                     [self.id, self.name, self.birthdate, self.address, self.district_id, self.email, self.password, self.last_login, self.is_superuser, self.is_staff]
                 )
 
+    def get_voted(self):
+        with connection.cursor() as cursor:
+            cursor.execute('EXECUTE dbo.SP_GetFinalVoteByUser @user_id = %s', [self.id])
+            if cursor.description:
+                return cursor.fetchone()[0]
+        return False
+
     @classmethod
     def from_db(cls, db, field_names, values):
         user = super().from_db(db, field_names, values)
@@ -137,7 +144,6 @@ class Candidate(models.Model):
     image = models.ImageField(upload_to='images/')
     description = models.TextField(null=True, blank=True)
     term = models.ForeignKey(Term, on_delete=models.CASCADE)
-    votes = models.IntegerField(default=0, editable=False)
 
     def __str__(self):
         return f"{self.name} - {self.district}"
